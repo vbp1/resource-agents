@@ -4,7 +4,7 @@
 #
 # Author:    Vadim Ponomarev (vponomarev@skala-r.ru)
 #
-# Version:   20211122-01
+# Version:   20211122-02
 #
 # License:   GNU General Public License (GPL)
 #
@@ -14,6 +14,7 @@
 #     OCF_RESKEY_name
 #     OCF_RESKEY_portno
 #     OCF_RESKEY_ip
+#     OCF_RESKEY_timeout
 #     OCF_RESKEY_verbose
 #
 #######################################################################
@@ -27,6 +28,7 @@
 OCF_RESKEY_portno_default="5432"
 OCF_RESKEY_ip_default="127.0.0.1"
 OCF_RESKEY_name_default="pgbouncer"
+OCF_RESKEY_timeout_default="3"
 OCF_RESKEY_verbose_default=false
 
 : ${OCF_RESKEY_portno=${OCF_RESKEY_portno_default}}
@@ -75,7 +77,7 @@ The name of the attributes to set. This is the name to be used in the constraint
 The port number used to be checked.
 </longdesc>
 <shortdesc lang="en">portno</shortdesc>
-<content type="string" default="${OCF_RESKEY_portno_default}" />
+<content type="integer" default="${OCF_RESKEY_portno_default}" />
 </parameter>
 
 <parameter name="ip" unique="0" required="0">
@@ -84,6 +86,14 @@ The IP address where port used to be checked is.
 </longdesc>
 <shortdesc lang="en">ip</shortdesc>
 <content type="string" default="${OCF_RESKEY_ip_default}" />
+</parameter>
+
+<parameter name="timeout" unique="0" required="0">
+<longdesc lang="en">
+Checking action timeout, in seconds.
+</longdesc>
+<shortdesc lang="en">check timeout, seconds</shortdesc>
+<content type="integer" default="${OCF_RESKEY_timeout_default}" />
 </parameter>
 
 <parameter name="verbose" unique="0" required="0">
@@ -141,7 +151,7 @@ fi
 }
 
 tcpportcheck_monitor() {
-  nc_out=$(nc -vz $OCF_RESKEY_ip $OCF_RESKEY_portno 2>&1)
+  nc_out=$(timeout $OCF_RESKEY_timeout nc -vz $OCF_RESKEY_ip $OCF_RESKEY_portno 2>&1)
   if [ $? == 0 ]; then
     check=1 # success
   else
