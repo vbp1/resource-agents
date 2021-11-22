@@ -4,7 +4,7 @@
 #
 # Author:    Vadim Ponomarev (vponomarev@skala-r.ru)
 #
-# Version:   20211120-01
+# Version:   20211122-01
 #
 # License:   GNU General Public License (GPL)
 #
@@ -40,11 +40,11 @@ CMD=`basename $0`
 usage()
 {
     cat <<END >&2
-    usage: $CMD {start|stop|status|monitor|meta-data}
+  usage: $CMD {start|stop|status|monitor|meta-data}
 
-    $CMD is used to check tcp port availiability.
+  $CMD is used to check tcp port availiability.
 
-    It can be used to check TCP port state (open or not) by using [ nc -vz IP_address Portnum ] command
+  It can be used to check TCP port state (open or not) by using [ nc -vz IP_address Portnum ] command
 
 END
 }
@@ -163,8 +163,8 @@ tcpportcheck_monitor() {
 }
 
 tcpportcheck_start() {
-    sanity_checks
-    tcpportcheck_monitor
+  sanity_checks
+  tcpportcheck_monitor
 }
 
 tcpportcheck_stop() {
