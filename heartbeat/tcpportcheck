@@ -4,7 +4,7 @@
 #
 # Author:    Vadim Ponomarev (vponomarev@skala-r.ru)
 #
-# Version:   20211122-02
+# Version:   20211122-03
 #
 # License:   GNU General Public License (GPL)
 #
@@ -149,6 +149,11 @@ if ! valid_ip $OCF_RESKEY_ip; then
   exit $OCF_ERR_CONFIGURED
 fi
 
+# check timeout value
+if [ $OCF_RESKEY_timeout == 0 ]; then
+  ocf_log err "Parameter timeout should be positive integer value!"
+  exit $OCF_ERR_CONFIGURED
+fi
 }
 
 tcpportcheck_monitor() {
