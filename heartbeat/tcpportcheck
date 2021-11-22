@@ -1,0 +1,193 @@
+#!/bin/sh
+#
+# tcpportcheck: checking tcp port availiability via netcat
+#
+# Author:    Vadim Ponomarev (vponomarev@skala-r.ru)
+#
+# Version:   20211120-01
+#
+# License:   GNU General Public License (GPL)
+#
+# Copyright: (C) 2021 Skala-R
+#
+#     OCF parameters are as below:
+#     OCF_RESKEY_name
+#     OCF_RESKEY_portno
+#     OCF_RESKEY_ip
+#     OCF_RESKEY_verbose
+#
+#######################################################################
+# Initialization:
+
+
+: ${OCF_FUNCTIONS_DIR=${OCF_ROOT}/lib/heartbeat}
+. ${OCF_FUNCTIONS_DIR}/ocf-shellfuncs
+
+# Defaults
+OCF_RESKEY_portno_default="5432"
+OCF_RESKEY_ip_default="127.0.0.1"
+OCF_RESKEY_name_default="pgbouncer"
+OCF_RESKEY_verbose_default=false
+
+: ${OCF_RESKEY_portno=${OCF_RESKEY_portno_default}}
+: ${OCF_RESKEY_ip=${OCF_RESKEY_ip_default}}
+: ${OCF_RESKEY_name=${OCF_RESKEY_name_default}}
+: ${OCF_RESKEY_verbose=${OCF_RESKEY_verbose_default}}
+
+####################################################################
+CMD=`basename $0`
+
+usage()
+{
+    cat <<END >&2
+    usage: $CMD {start|stop|status|monitor|meta-data}
+
+    $CMD is used to check tcp port availiability.
+
+    It can be used to check TCP port state (open or not) by using [ nc -vz IP_address Portnum ] command
+
+END
+}
+
+meta_data() {
+    cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="tcpportcheck" version="1.0">
+<version>1.0</version>
+
+<longdesc lang="en">
+Resource script for tcpportcheck. It can be used to check TCP port state (open or not) by using [ nc -vz IP_address Portnum ] command
+</longdesc>
+<shortdesc lang="en">checking tcp port availiability via netcat</shortdesc>
+
+<parameters>
+<parameter name="name" unique="1" required="1">
+<longdesc lang="en">
+The name of the attributes to set. This is the name to be used in the constraints.
+</longdesc>
+<shortdesc lang="en">Attribute name</shortdesc>
+<content type="string" default="${OCF_RESKEY_name_default}" />
+</parameter>
+
+<parameter name="portno" unique="0" required="0">
+<longdesc lang="en">
+The port number used to be checked.
+</longdesc>
+<shortdesc lang="en">portno</shortdesc>
+<content type="string" default="${OCF_RESKEY_portno_default}" />
+</parameter>
+
+<parameter name="ip" unique="0" required="0">
+<longdesc lang="en">
+The IP address where port used to be checked is.
+</longdesc>
+<shortdesc lang="en">ip</shortdesc>
+<content type="string" default="${OCF_RESKEY_ip_default}" />
+</parameter>
+
+<parameter name="verbose" unique="0" required="0">
+<longdesc lang="en">
+Enable verbose tracing.
+</longdesc>
+<shortdesc lang="en">Verbosity</shortdesc>
+<content type="boolean" default="${OCF_RESKEY_verbose_default}" />
+</parameter>
+</parameters>
+
+<actions>
+<action name="start" timeout="5s" />
+<action name="stop" timeout="5s" />
+<action name="status" depth="0" timeout="10s" interval="30s" />
+<action name="monitor" depth="0" timeout="10s" interval="30s" />
+<action name="meta-data" timeout="5s" />
+</actions>
+</resource-agent>
+END
+}
+
+function valid_ip()
+{
+  local  ip=$1
+  local  stat=1
+
+  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    OIFS=$IFS
+    IFS='.'
+    ip=($ip)
+    IFS=$OIFS
+    [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+      && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+    stat=$?
+  fi
+  return $stat
+}
+
+sanity_checks() {
+check_binary nc || exit $OCF_ERR_INSTALLED
+
+# check portvalue
+if ! ocf_is_decimal $OCF_RESKEY_portno; then
+  ocf_log err "Parameter portno is not numeric!"
+  exit $OCF_ERR_CONFIGURED
+fi
+
+# check IP address value
+if ! valid_ip $OCF_RESKEY_ip; then
+  ocf_log err "Parameter ip is not IP address!"
+  exit $OCF_ERR_CONFIGURED
+fi
+
+}
+
+tcpportcheck_monitor() {
+  nc_out=$(nc -vz $OCF_RESKEY_ip $OCF_RESKEY_portno 2>&1)
+  if [ $? == 0 ]; then
+    check=1 # success
+  else
+    check=0 # failure
+  fi
+  if ocf_is_true $OCF_RESKEY_verbose; then 
+    ocf_log info "Check have been executed. Result is: $nc_out"
+  fi
+  attrd_updater -n ${OCF_RESKEY_name} -v $check -q
+  if [ ! $? == 0 ]; then
+    ocf_log error "attrd_updater: Could not update ${OCF_RESKEY_name} = $check: rc=$rc"
+    return $OCF_ERR_GENERIC
+  else
+    if ocf_is_true $OCF_RESKEY_verbose; then 
+      ocf_log info "attrd_updater: Updated ${OCF_RESKEY_name} = $check"
+    fi
+    return $OCF_SUCCESS
+  fi
+}
+
+tcpportcheck_start() {
+    sanity_checks
+    tcpportcheck_monitor
+}
+
+tcpportcheck_stop() {
+  attrd_updater -D -n ${OCF_RESKEY_name}
+}
+
+if ( [ $# -ne 1 ] )
+then
+  usage
+  exit $OCF_ERR_ARGS
+fi
+
+case $1 in
+  start)           tcpportcheck_start
+                   ;;
+  stop)            tcpportcheck_stop
+                   ;;
+  status|monitor)  tcpportcheck_monitor
+                   ;;
+  meta-data)       meta_data
+                   ;;
+  *)               usage
+                   ;;
+esac
+
+exit $?
