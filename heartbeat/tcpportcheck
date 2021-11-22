@@ -34,6 +34,7 @@ OCF_RESKEY_verbose_default=false
 : ${OCF_RESKEY_portno=${OCF_RESKEY_portno_default}}
 : ${OCF_RESKEY_ip=${OCF_RESKEY_ip_default}}
 : ${OCF_RESKEY_name=${OCF_RESKEY_name_default}}
+: ${OCF_RESKEY_timeout=${OCF_RESKEY_timeout_default}}
 : ${OCF_RESKEY_verbose=${OCF_RESKEY_verbose_default}}
 
 ####################################################################
