@@ -43,7 +43,7 @@ radir			= $(abs_top_builddir)/heartbeat
 symlinkstargets		= \
 			  ocf-distro ocf.py ocf-rarun ocf-returncodes \
 			  findif.sh apache-conf.sh http-mon.sh mysql-common.sh \
-			  nfsserver-redhat.sh ora-common.sh
+			  nfsserver-redhat.sh openstack-common.sh ora-common.sh
 
 preptree:
 	for i in $(symlinkstargets); do \
@@ -127,6 +127,7 @@ man_MANS                = ocf_heartbeat_AoEtarget.7 \
                           ocf_heartbeat_azure-lb.7 \
                           ocf_heartbeat_clvm.7 \
                           ocf_heartbeat_conntrackd.7 \
+                          ocf_heartbeat_corosync-qnetd.7 \
                           ocf_heartbeat_crypt.7 \
                           ocf_heartbeat_db2.7 \
                           ocf_heartbeat_dhcpd.7 \
@@ -172,6 +173,7 @@ man_MANS                = ocf_heartbeat_AoEtarget.7 \
                           ocf_heartbeat_nvmet-namespace.7 \
                           ocf_heartbeat_nvmet-port.7 \
                           ocf_heartbeat_openstack-info.7 \
+                          ocf_heartbeat_ocivip.7 \
                           ocf_heartbeat_openstack-cinder-volume.7 \
                           ocf_heartbeat_openstack-floating-ip.7 \
                           ocf_heartbeat_openstack-virtual-ip.7 \

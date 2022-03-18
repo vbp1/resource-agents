@@ -101,6 +101,7 @@ ocf_SCRIPTS	      = AoEtarget		\
 			azure-lb		\
 			clvm			\
 			conntrackd		\
+			corosync-qnetd		\
 			crypt			\
 			db2			\
 			dhcpd			\
@@ -143,6 +144,7 @@ ocf_SCRIPTS	      = AoEtarget		\
 			nvmet-subsystem		\
 			nvmet-namespace		\
 			nvmet-port		\
+			ocivip \
 			openstack-cinder-volume \
 			openstack-floating-ip   \
 			openstack-info          \
@@ -212,6 +214,7 @@ ocfcommon_DATA		= ocf-shellfuncs 	\
 			  lvm-clvm.sh		\
 			  lvm-plain.sh		\
 			  lvm-tag.sh		\
+			  openstack-common.sh	\
 			  ora-common.sh		\
 			  mysql-common.sh	\
 			  nfsserver-redhat.sh	\
